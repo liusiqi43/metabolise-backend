@@ -14,7 +14,7 @@ def predict_units(predictor, dish_without_unit, topn):
     for i, u in enumerate(units):
         if u <= 0:
             continue
-        predicted_units.append((u, unit_classifier._model.classes_[i]))
+        predicted_units.append((u, predictor._model.classes_[i]))
     predicted_units = sorted(predicted_units, reverse = True)
     return predicted_units[:topn]
 

@@ -26,8 +26,11 @@ class Calorie(Resource):
   def get(self):
     dish = request.args.get('dish')
     predicted_cals = predict_cal(calories_regressor, dish)
-    print predicted_cals
-    return predicted_cals[0]
+    predicted_units = predict_units(unit_classifier, dish, 1)
+    print predicted_cals, predicted_units
+    result = {'calories': int(predicted_cals[0]), 
+              'units': predicted_units[0][1]}
+    return result
 
 api.add_resource(Calorie, '/')
 
