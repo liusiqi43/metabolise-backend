@@ -2,9 +2,6 @@ from train import Trainer, CaloriesClassifier
 from sklearn.externals import joblib
 
 import time
-import logging
-import sys
-import numpy as np
 
 def predict_cal(dish_with_unit):
     predicted_cals = calories_classifier.Predict([dish_with_unit])
