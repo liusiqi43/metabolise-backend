@@ -8,7 +8,6 @@ from sklearn.metrics import median_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import explained_variance_score
 from sklearn.metrics import classification_report
-from sklearn.externals import joblib
 
 import time
 import logging
@@ -30,8 +29,8 @@ class Trainer(object):
         self._x_train = x[:sample_train]
         self._y_train = y[:sample_train]
 
-        self._x_test = x[:len(x) - sample_train]
-        self._y_test = y[:len(y) - sample_train]
+        self._x_test = x[len(x) - sample_train:]
+        self._y_test = y[len(y) - sample_train:]
 
         self._trained = False
         self._model = None
@@ -48,6 +47,14 @@ class Trainer(object):
                 'Prediction requested but model is not trained yet.')
         x_test = self.Preprocess(x)
         return self._model.predict(x_test)
+
+    def PredictProba(self, x):
+        if not self._trained:
+            raise RuntimeError(
+                'Prediction requested but model is not trained yet.')
+        x_test = self.Preprocess(x)
+        return self._model.predict_proba(x_test)
+
 
     def Report(self):
         if not self._trained:
@@ -173,30 +180,3 @@ class UnitClassifier(Trainer):
             'report': classification_report(self._y_test, y_pred,
                                             target_names=self._model.classes_)
         }
-
-
-if __name__ == '__main__':
-    from training_set import get_cal_data, get_unit_data
-    from pymongo import MongoClient
-
-    # x_cal, y_cal = get_cal_data(MongoClient())
-    # calories_classifier = CaloriesClassifier(x_cal, y_cal, 0.8)
-    # calories_classifier.Train()
-    # calories_classifier.Report()
-    # joblib.dump(calories_classifier,
-    #             'models/calories_classifier_%s.pkl' % time.strftime('%Y%m%d'))
-
-    x_cal, y_cal = get_cal_data(MongoClient())
-    calories_trainer = CaloriesRegressor(x_cal, y_cal, 0.8)
-    calories_trainer.Train()
-    calories_trainer.Report()
-    joblib.dump(calories_trainer, open('models/calories_regressor_%s.pkl' %
-                                       time.strftime('%Y%m%d'), 'wb'))
-
-    # x_unit, y_unit = get_unit_data(MongoClient())
-    # unit_trainer = UnitClassifier(x_unit, y_unit, 0.8)
-    # unit_trainer.Train()
-    # unit_trainer.Report()
-    # pickle.dump(unit_trainer,
-    #             open('models/unit_classifier_%s.pkl' % time.strftime('%Y%m%d'),
-    #                  'wb'))
