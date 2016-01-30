@@ -8,8 +8,6 @@ from sklearn.metrics import median_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import explained_variance_score
 from sklearn.metrics import classification_report
-from training_set import get_cal_data, get_unit_data
-from pymongo import MongoClient
 
 import time
 import pickle
@@ -140,6 +138,9 @@ class UnitTrainer(Trainer):
 
 
 if __name__ == '__main__':
+    from training_set import get_cal_data, get_unit_data
+    from pymongo import MongoClient
+
     x_cal, y_cal = get_cal_data(MongoClient())
     calories_trainer = CaloriesTrainer(x_cal, y_cal, 0.8)
     calories_trainer.Train()
@@ -147,10 +148,10 @@ if __name__ == '__main__':
     pickle.dump(calories_trainer, open('models/calories_trainer_%s_1.pkl' %
                                        time.strftime('%Y%m%d'), 'wb'))
 
-    #x_unit, y_unit = get_unit_data(MongoClient())
-    #unit_trainer = UnitTrainer(x_unit, y_unit, 0.8)
-    #unit_trainer.Train()
-    #unit_trainer.Report()
-    #pickle.dump(unit_trainer,
-    #            open('models/unit_trainer_%s.pkl' % time.strftime('%Y%m%d'),
-    #                 'wb'))
+    x_unit, y_unit = get_unit_data(MongoClient())
+    unit_trainer = UnitTrainer(x_unit, y_unit, 0.8)
+    unit_trainer.Train()
+    unit_trainer.Report()
+    pickle.dump(unit_trainer,
+                open('models/unit_trainer_%s.pkl' % time.strftime('%Y%m%d'),
+                     'wb'))
