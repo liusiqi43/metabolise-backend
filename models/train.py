@@ -69,9 +69,9 @@ class Trainer(object):
             'Eval() is not implemented by Trainer subclass.')
 
 
-class CaloriesTrainer(Trainer):
+class CaloriesRegressor(Trainer):
     def __init__(self, x, y, train_ratio):
-        super(CaloriesTrainer, self).__init__(x, y, train_ratio)
+        super(CaloriesRegressor, self).__init__(x, y, train_ratio)
         self._count_vec = CountVectorizer()
         self._tfidf_transformer = TfidfTransformer()
 
@@ -104,9 +104,9 @@ class CaloriesTrainer(Trainer):
         }
 
 
-class UnitTrainer(Trainer):
+class UnitClassifier(Trainer):
     def __init__(self, x, y, train_ratio):
-        super(UnitTrainer, self).__init__(x, y, train_ratio)
+        super(UnitClassifier, self).__init__(x, y, train_ratio)
         self._count_vec = CountVectorizer()
         self._tfidf_transformer = TfidfTransformer()
 
@@ -142,14 +142,14 @@ if __name__ == '__main__':
     from pymongo import MongoClient
 
     x_cal, y_cal = get_cal_data(MongoClient())
-    calories_trainer = CaloriesTrainer(x_cal, y_cal, 0.8)
+    calories_trainer = CaloriesRegressor(x_cal, y_cal, 0.8)
     calories_trainer.Train()
     calories_trainer.Report()
-    pickle.dump(calories_trainer, open('models/calories_trainer_%s_1.pkl' %
+    pickle.dump(calories_trainer, open('models/calories_trainer_%s.pkl' %
                                        time.strftime('%Y%m%d'), 'wb'))
 
     x_unit, y_unit = get_unit_data(MongoClient())
-    unit_trainer = UnitTrainer(x_unit, y_unit, 0.8)
+    unit_trainer = UnitClassifier(x_unit, y_unit, 0.8)
     unit_trainer.Train()
     unit_trainer.Report()
     pickle.dump(unit_trainer,
