@@ -8,9 +8,9 @@ from sklearn.metrics import median_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import explained_variance_score
 from sklearn.metrics import classification_report
+from sklearn.externals import joblib
 
 import time
-import pickle
 import logging
 import sys
 import numpy as np
@@ -18,11 +18,15 @@ import numpy as np
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 LOG = logging.getLogger('training')
 
+def _descritize(y, scale, lower = 5, upper = 3000):
+    y = np.asarray(y)
+    y = np.clip(scale * np.round(y/scale, 1), lower, upper).astype(int)
+    y = ["%d" % cls for cls in y]
+    return y
 
 class Trainer(object):
     def __init__(self, x, y, train_ratio):
         sample_train = int(train_ratio * len(x))
-        print 'x[0]', x[0], 'y[0]', y[0]
         self._x_train = x[:sample_train]
         self._y_train = y[:sample_train]
 
@@ -35,7 +39,6 @@ class Trainer(object):
     def Train(self):
         self.Fit()
         x_train = self.Preprocess(self._x_train)
-        print 'preprocessed x_train[0]: ', x_train[0]
         self._model = self.Learn(x_train, self._y_train)
         self._trained = True
 
@@ -52,7 +55,7 @@ class Trainer(object):
                 'Report requested but model is not trained yet.')
         report = self.Eval()
         for k, v in report.iteritems():
-            LOG.info('metric [%s] = %s', k, repr(v))
+            LOG.info('metric [%s] = %s', k, str(v))
 
     def Preprocess(self, x):
         return x
@@ -104,6 +107,41 @@ class CaloriesRegressor(Trainer):
         }
 
 
+class CaloriesClassifier(Trainer):
+    def __init__(self, x, y, train_ratio):
+        super(CaloriesClassifier, self).__init__(x, y, train_ratio)
+        self._count_vec = CountVectorizer()
+        self._tfidf_transformer = TfidfTransformer()
+        self._y_train = _descritize(self._y_train, 100)
+        self._y_test = _descritize(self._y_test, 100)
+
+    def Fit(self):
+        x_count = self._count_vec.fit_transform(self._x_train)
+        self._tfidf_transformer.fit(x_count)
+
+    def Preprocess(self, x):
+        print x[0]
+        return self._tfidf_transformer.transform(self._count_vec.transform(x))
+
+    def Learn(self, x_train, y_train):
+        LOG.info('x_train.shape = %s', str(x_train.shape))
+        LOG.info('len(y_train) = %d', len(y_train))
+
+        clf = RandomForestClassifier(verbose=0, n_jobs=-1, n_estimators=10)
+        LOG.info('Training...')
+        clf.fit(x_train, y_train)
+        LOG.info('Done...')
+        return clf
+
+    def Eval(self):
+        LOG.info('Eval ...')
+        y_pred = self.Predict(self._x_test)
+        return {
+            'misclass': np.mean(y_pred != self._y_test),
+            'report': classification_report(self._y_test, y_pred,
+                                            target_names=self._model.classes_)
+        }
+
 class UnitClassifier(Trainer):
     def __init__(self, x, y, train_ratio):
         super(UnitClassifier, self).__init__(x, y, train_ratio)
@@ -141,17 +179,24 @@ if __name__ == '__main__':
     from training_set import get_cal_data, get_unit_data
     from pymongo import MongoClient
 
+    # x_cal, y_cal = get_cal_data(MongoClient())
+    # calories_classifier = CaloriesClassifier(x_cal, y_cal, 0.8)
+    # calories_classifier.Train()
+    # calories_classifier.Report()
+    # joblib.dump(calories_classifier,
+    #             'models/calories_classifier_%s.pkl' % time.strftime('%Y%m%d'))
+
     x_cal, y_cal = get_cal_data(MongoClient())
     calories_trainer = CaloriesRegressor(x_cal, y_cal, 0.8)
     calories_trainer.Train()
     calories_trainer.Report()
-    pickle.dump(calories_trainer, open('models/calories_trainer_%s.pkl' %
+    joblib.dump(calories_trainer, open('models/calories_regressor_%s.pkl' %
                                        time.strftime('%Y%m%d'), 'wb'))
 
-    x_unit, y_unit = get_unit_data(MongoClient())
-    unit_trainer = UnitClassifier(x_unit, y_unit, 0.8)
-    unit_trainer.Train()
-    unit_trainer.Report()
-    pickle.dump(unit_trainer,
-                open('models/unit_trainer_%s.pkl' % time.strftime('%Y%m%d'),
-                     'wb'))
+    # x_unit, y_unit = get_unit_data(MongoClient())
+    # unit_trainer = UnitClassifier(x_unit, y_unit, 0.8)
+    # unit_trainer.Train()
+    # unit_trainer.Report()
+    # pickle.dump(unit_trainer,
+    #             open('models/unit_classifier_%s.pkl' % time.strftime('%Y%m%d'),
+    #                  'wb'))
