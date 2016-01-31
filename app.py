@@ -12,12 +12,10 @@ import time
 app = Flask(__name__)
 api = Api(app)
 
-# calories_regressor = joblib.load('models/calories_regressor_%s.pkl'
-#                                  % time.strftime('%Y%m%d'))
-# unit_classifier = joblib.load('models/unit_classifier_%s.pkl'
-#                               % time.strftime('%Y%m%d'))
-calories_regressor = joblib.load('models/calories_regressor_20160130.pkl')
-calories_regressor = joblib.load('models/unit_classifier_20160130.pkl')
+calories_regressor = joblib.load('models/calories_regressor_%s.pkl'
+                                 % time.strftime('%Y%m%d'))
+unit_classifier = joblib.load('models/unit_classifier_%s.pkl'
+                              % time.strftime('%Y%m%d'))
 
 def get_results(dish):
   """Return dict of estimated calories and serving size of dish."""
