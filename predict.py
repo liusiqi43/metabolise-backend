@@ -18,11 +18,9 @@ def predict_units(predictor, dish_without_unit, topn):
     predicted_units = sorted(predicted_units, reverse = True)
     return predicted_units[:topn]
 
-
-
-if __name__ == '__main__':
-    calories_regressor = joblib.load('models/calories_regressor_%s.pkl'
-                                     % time.strftime('%Y%m%d'))
+def main():
+    calories_regressor = joblib.load('models/calories_regressor_20160130.pkl'
+                                     )
     unit_classifier = joblib.load('models/unit_classifier_%s.pkl'
                                   % time.strftime('%Y%m%d'))
 
@@ -30,3 +28,8 @@ if __name__ == '__main__':
         name = raw_input('Name of the dish? ')
         print 'calories: ', predict_cal(calories_regressor, name)
         print 'units: ', predict_units(unit_classifier, name, 5)
+
+
+if __name__ == '__main__':
+    main()
+

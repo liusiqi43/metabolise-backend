@@ -16,7 +16,7 @@ def parse_item(n):
     return qty, unit, tokens
 
 
-def get_cal_data(client):
+def get_cal_data(client, unit_blacklist):
     nutrition = client.knowledge.nutrition
     projection = ['item_name', 'item_description', 'nf_serving_size_qty',
                   'nf_serving_size_unit', 'nf_calories']
@@ -28,6 +28,8 @@ def get_cal_data(client):
         qty, unit, tokens = parse_item(n)
         if unit not in tokens:
             tokens.append(unit)
+        if unit in unit_blacklist or len(unit) >= 10:
+            continue
         X_cal.append(' '.join(tokens))
         Y_cal.append(n['nf_calories'] / qty)
     data_cal = zip(X_cal, Y_cal)
@@ -37,7 +39,7 @@ def get_cal_data(client):
     return X_cal, Y_cal
 
 
-def get_unit_data(client):
+def get_unit_data(client, unit_blacklist):
     nutrition = client.knowledge.nutrition
     projection = ['item_name', 'item_description', 'nf_serving_size_qty',
                   'nf_serving_size_unit', 'nf_calories']
@@ -47,8 +49,12 @@ def get_unit_data(client):
         {'nf_calories': {'$gt': 0},
          'nf_serving_size_qty': {'$gt': 0}}, projection):
         _, unit, tokens = parse_item(n)
+
+        if unit in unit_blacklist or len(unit) >= 10:
+            continue
         X_unit.append(' '.join(tokens))
         Y_unit.append(unit)
+
     data_unit = zip(X_unit, Y_unit)
     random.shuffle(data_unit)
 
@@ -59,10 +65,10 @@ def get_unit_data(client):
 if __name__ == '__main__':
     client = MongoClient()
 
-    X_cal, Y_cal = get_cal_data(client)
+    X_cal, Y_cal = get_cal_data(client, set([]))
     print X_cal[:10]
     print Y_cal[:10]
 
-    X_unit, Y_unit = get_unit_data(client)
+    X_unit, Y_unit = get_unit_data(client, set([]))
     print X_unit[:10]
     print Y_unit[:10]
