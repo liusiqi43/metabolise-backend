@@ -27,7 +27,7 @@ def get_results(dish):
 class Calorie(Resource):
   def get(self):
     dish = request.args.get('dish')
-    dish = ' '.join(dish.split[:-1])
+    dish = ' '.join(dish.split()[:-1])
     return get_results(dish)
 
 class Speech(Resource):
