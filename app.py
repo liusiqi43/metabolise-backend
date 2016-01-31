@@ -6,42 +6,41 @@ from sklearn.externals import joblib
 from train import Trainer, UnitClassifier, CaloriesRegressor
 from predict import predict_cal, predict_units
 from speech import get_text
-from hodclient import *
 
 import time
 
 app = Flask(__name__)
 api = Api(app)
 
-calories_regressor = joblib.load('models/calories_regressor_%s.pkl'
-                                 % time.strftime('%Y%m%d'))
-unit_classifier = joblib.load('models/unit_classifier_%s.pkl'
-                              % time.strftime('%Y%m%d'))
+# calories_regressor = joblib.load('models/calories_regressor_%s.pkl'
+#                                  % time.strftime('%Y%m%d'))
+# unit_classifier = joblib.load('models/unit_classifier_%s.pkl'
+#                               % time.strftime('%Y%m%d'))
+calories_regressor = joblib.load('models/calories_regressor_20160130.pkl')
+calories_regressor = joblib.load('models/unit_classifier_20160130.pkl')
 
-def speech_to_text(filename):
-  with open(filename, 'rb') as audio:
-    response = request.post(url, files={'file': audio}, data={'apikey': api_key})
-  print response
+def get_results(dish):
+  """Return dict of estimated calories and serving size of dish."""
+  predicted_cals = predict_cal(calories_regressor, dish)
+  predicted_units = predict_units(unit_classifier, dish, 1)
+  result = {'calories': int(predicted_cals[0]), 
+            'units': predicted_units[0][1]}
+  return result
 
 class Calorie(Resource):
   def get(self):
     dish = request.args.get('dish')
-    predicted_cals = predict_cal(calories_regressor, dish)
-    predicted_units = predict_units(unit_classifier, dish, 1)
-    print predicted_cals, predicted_units
-    result = {'calories': int(predicted_cals[0]), 
-              'units': predicted_units[0][1]}
-    return result
+    return get_results(dish)
 
 class Speech(Resource):
   def post(self):
-    file = request.files['file']
-    filename = secure_filename(file.filename)
-    file.save('./' + filename)
-    result = {'text': get_text(filename)}
-    return result
+    f = request.files['file']
+    f.save('test.mp3')
+    f.close()
+    return {'text': get_text('test.mp3')}
 
 api.add_resource(Calorie, '/')
+api.add_resource(Speech, '/speech')
 
 if __name__ == '__main__':
   app.run(debug=True)
