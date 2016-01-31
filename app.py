@@ -12,7 +12,8 @@ import time
 app = Flask(__name__)
 api = Api(app)
 
-calories_regressor = joblib.load('models/calories_regressor_20160130.pkl')
+calories_regressor = joblib.load('models/calories_regressor_%s.pkl'
+                              % time.strftime('%Y%m%d'))
 unit_classifier = joblib.load('models/unit_classifier_%s.pkl'
                               % time.strftime('%Y%m%d'))
 
@@ -20,7 +21,7 @@ def get_results(dish):
   """Return dict of estimated calories and serving size of dish."""
   predicted_cals = predict_cal(calories_regressor, dish)
   predicted_units = predict_units(unit_classifier, ' '.join(dish.split()[:-1]), 1)
-  result = {'calories': int(predicted_cals[0]), 
+  result = {'calories': int(predicted_cals[0]),
             'units': predicted_units[0][1]}
   return result
 
@@ -40,4 +41,4 @@ api.add_resource(Calorie, '/')
 api.add_resource(Speech, '/speech')
 
 if __name__ == '__main__':
-  app.run(debug=True)
+  app.run(host='0.0.0.0', port=3000)

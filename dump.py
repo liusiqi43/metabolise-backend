@@ -11,7 +11,6 @@ from sklearn.externals import joblib
 
 
 if __name__ == '__main__':
-    blacklist = set(['g', 'oz', 'fl oz', 'gram', 'tbsp'])
     # x_cal, y_cal = get_cal_data(MongoClient(), blacklist)
     # calories_classifier = CaloriesClassifier(x_cal, y_cal, 0.8)
     # calories_classifier.Train()
@@ -19,7 +18,7 @@ if __name__ == '__main__':
     # joblib.dump(calories_classifier,
     #             'models/calories_classifier_%s.pkl' % time.strftime('%Y%m%d'))
 
-    x_cal, y_cal = get_cal_data(MongoClient(), blacklist)
+    x_cal, y_cal = get_cal_data(MongoClient())
     calories_trainer = CaloriesRegressor(x_cal, y_cal, 0.9)
     calories_trainer.Train()
     calories_trainer.Report()

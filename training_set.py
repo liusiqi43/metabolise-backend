@@ -16,7 +16,7 @@ def parse_item(n):
     return qty, unit, tokens
 
 
-def get_cal_data(client, unit_blacklist):
+def get_cal_data(client):
     nutrition = client.knowledge.nutrition
     projection = ['item_name', 'item_description', 'nf_serving_size_qty',
                   'nf_serving_size_unit', 'nf_calories']
@@ -28,8 +28,6 @@ def get_cal_data(client, unit_blacklist):
         qty, unit, tokens = parse_item(n)
         if unit not in tokens:
             tokens.append(unit)
-        if unit in unit_blacklist or len(unit) >= 10:
-            continue
         X_cal.append(' '.join(tokens))
         Y_cal.append(n['nf_calories'] / qty)
     data_cal = zip(X_cal, Y_cal)
@@ -39,7 +37,7 @@ def get_cal_data(client, unit_blacklist):
     return X_cal, Y_cal
 
 
-def get_unit_data(client, unit_blacklist):
+def get_unit_data(client):
     nutrition = client.knowledge.nutrition
     projection = ['item_name', 'item_description', 'nf_serving_size_qty',
                   'nf_serving_size_unit', 'nf_calories']
@@ -50,8 +48,6 @@ def get_unit_data(client, unit_blacklist):
          'nf_serving_size_qty': {'$gt': 0}}, projection):
         _, unit, tokens = parse_item(n)
 
-        if unit in unit_blacklist or len(unit) >= 10:
-            continue
         X_unit.append(' '.join(tokens))
         Y_unit.append(unit)
 
