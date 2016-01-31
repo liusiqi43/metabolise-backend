@@ -12,8 +12,7 @@ import time
 app = Flask(__name__)
 api = Api(app)
 
-calories_regressor = joblib.load('models/calories_regressor_%s.pkl'
-                                 % time.strftime('%Y%m%d'))
+calories_regressor = joblib.load('models/calories_regressor_20160130.pkl')
 unit_classifier = joblib.load('models/unit_classifier_%s.pkl'
                               % time.strftime('%Y%m%d'))
 
