@@ -19,7 +19,7 @@ unit_classifier = joblib.load('models/unit_classifier_%s.pkl'
 def get_results(dish):
   """Return dict of estimated calories and serving size of dish."""
   predicted_cals = predict_cal(calories_regressor, dish)
-  predicted_units = predict_units(unit_classifier, dish, 1)
+  predicted_units = predict_units(unit_classifier, ' '.join(dish.split()[:-1]), 1)
   result = {'calories': int(predicted_cals[0]), 
             'units': predicted_units[0][1]}
   return result
@@ -27,7 +27,6 @@ def get_results(dish):
 class Calorie(Resource):
   def get(self):
     dish = request.args.get('dish')
-    dish = ' '.join(dish.split()[:-1])
     return get_results(dish)
 
 class Speech(Resource):
