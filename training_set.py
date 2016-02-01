@@ -47,8 +47,10 @@ def get_unit_data(client):
         {'nf_calories': {'$gt': 0},
          'nf_serving_size_qty': {'$gt': 0}}, projection):
         _, unit, tokens = parse_item(n)
+
         X_unit.append(' '.join(tokens))
         Y_unit.append(unit)
+
     data_unit = zip(X_unit, Y_unit)
     random.shuffle(data_unit)
 
@@ -59,10 +61,10 @@ def get_unit_data(client):
 if __name__ == '__main__':
     client = MongoClient()
 
-    X_cal, Y_cal = get_cal_data(client)
+    X_cal, Y_cal = get_cal_data(client, set([]))
     print X_cal[:10]
     print Y_cal[:10]
 
-    X_unit, Y_unit = get_unit_data(client)
+    X_unit, Y_unit = get_unit_data(client, set([]))
     print X_unit[:10]
     print Y_unit[:10]

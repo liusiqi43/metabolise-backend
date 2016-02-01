@@ -96,7 +96,7 @@ class CaloriesRegressor(Trainer):
         LOG.info('x_train.shape = %s', str(x_train.shape))
         LOG.info('len(y_train) = %d', len(y_train))
 
-        clf = RandomForestRegressor(verbose=0, n_jobs=-1, n_estimators=10)
+        clf = RandomForestRegressor(verbose=0, n_jobs=-1, n_estimators=100)
         LOG.info('Training...')
         clf.fit(x_train, y_train)
         LOG.info('Done...')
@@ -166,7 +166,7 @@ class UnitClassifier(Trainer):
         LOG.info('x_train.shape = %s', str(x_train.shape))
         LOG.info('len(y_train) = %d', len(y_train))
 
-        clf = RandomForestClassifier(verbose=0, n_jobs=-1, n_estimators=10)
+        clf = RandomForestClassifier(verbose=0, n_jobs=-1, n_estimators=20)
         LOG.info('Training...')
         clf.fit(x_train, y_train)
         LOG.info('Done...')
